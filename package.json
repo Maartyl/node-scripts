@@ -1,0 +1,19 @@
+{
+  "name": "slurps",
+  "version": "1.0.0",
+  "description": "downloads files",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "maartyl",
+  "private": true,
+  "repository": "stop bothering me",
+  "license": "ISC",
+  "dependencies": {
+    "argv-parse": "^1.0.1",
+    "bluebird": "^3.4.5",
+    "moment": "^2.14.1",
+    "request": "^2.74.0"
+  }
+}
