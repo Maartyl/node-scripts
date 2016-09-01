@@ -1,7 +1,7 @@
 {
   "name": "slurps",
   "version": "1.0.0",
-  "description": "downloads files",
+  "description": "small scripts in nodejs; downloading and stuff",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
