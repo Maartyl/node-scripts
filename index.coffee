@@ -12,10 +12,7 @@ args = argv
 
 # line event handler
 # :: line -> P _
-core_download = (fldr, cachep) -> (line) ->
-  slurps.download line, cachep, fldr
-  .then (m) -> console.log 'done:', m.nm; m
-
+core_download = (fldr, cachep) -> (line) -> slurps.download line, cachep, fldr
 
 core_cache_init = (cp) -> (line) -> slurps.init_cache line, cp
 
@@ -41,12 +38,12 @@ run = (lcore) -> Promise.promisify(line_loop)(lcore).then fin
 main = ->
   unless args.cache
     return console.error 'needs cache field'
-  unless args.reverse
-    return console.error 'needs cache reverse field'
 
   if args.download
-    run core_download args.download, path:args.cache
+    run core_download args.download, args.cache
   else
+    unless args.reverse
+      return console.error 'needs cache reverse field'
     run core_cache_init {path:args.cache, rev:args.reverse}
 
 main()

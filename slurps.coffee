@@ -7,6 +7,8 @@ moment    = require 'moment'
 
 P = (fn) -> new Promise fn
 
+path_absolute = (p) -> '/'+path.relative '/', p
+
 sha = (str) ->
   crypto.createHash 'sha1'
   .update str
@@ -70,8 +72,7 @@ download_req = (url, nmp, hurl, cp) -> P (resolve, reject) ->
   rq.on 'resposnse', -> console.log 'response:', nmp
   rq.on 'end', (x) -> fs.appendFile cp, mson_done(nmp, do stamp), (err) ->
     if err then console.log 'done.err:', err, nmp #even err is ok at this point
-    else console.log 'done:', nmp
-    resolve ws:x, nmp:nmp, url:url, hurl:hurl, err:err
+    resolve ws:x, path:nmp, url:url, hurl:hurl, err:err
 
 download = (url, cache_path, folder) ->
   hurl  = hash url
@@ -79,18 +80,20 @@ download = (url, cache_path, folder) ->
 
   test_finished(hurlp).then (pick) -> pick
     name: (cache, nm) ->
-      nmp   = path.join folder, nm
+      nmp = path.join folder, nm
       # inform cache
       console.log 'start:', nm
       fs.appendFileAsync(hurlp, mson_start do stamp)
         .then -> download_req url, nmp, hurl, hurlp
-    done: (cache) -> console.log 'already downloaded:', cache.name
+        .then (m) -> console.log 'done:', nm; m
+    done: (cache) -> console.log 'already downloaded:', cache.name; cache
 
 init_cache = (url, cache_path) ->
   hurl = hash url
   hurlp = path.join(cache_path.path, '.'+hurl)
 
   with_cache hurlp
+  .then (cache) -> path:hurlp, new:false, name:cache.name, cache:cache
   .catch (err) ->
     unless err.code is 'ENOENT' #no such file (Error NO entity)
       throw err
@@ -98,13 +101,10 @@ init_cache = (url, cache_path) ->
       unless nm then throw name:nm, url:url
       fs.writeFileAsync(hurlp, mson_cache url, nm, hurl).then ->
         path:hurlp, new:true, name: nm
-# WRONG: the following will follow the error too (duh)
-# receives pnn OR cache
-  .then (cache) -> path:hurlp, new:false, name:cache.name #, cache:cache
   .then (pnn) ->
     pr = path.join cache_path.rev, pnn.name
-    pr = '/'+path.relative '/', pr #get absolute path for symlink
-    ph = '/'+path.relative '/', hurlp #get absolute path for symlink
+#     pr = path_absolute pr    #get absolute path for symlink
+    ph = path_absolute hurlp #get absolute path for symlink
     fs.symlinkAsync ph, pr
     .then -> pnn
 
